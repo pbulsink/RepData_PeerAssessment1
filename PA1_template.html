@@ -232,7 +232,7 @@ byWeekendIntervals&lt;-cbind(intervals, weekendmeans, rep(&quot;Weekend&quot;, l
 colnames(byWeekendIntervals)&lt;-c(&quot;interval&quot;, &quot;steps&quot;, &quot;weekend&quot;)
 weeklyIntervals&lt;-rbind(byWeekIntervals, byWeekendIntervals)
 weeklyIntervals$weekend&lt;-as.factor(weeklyIntervals$weekend)</code></pre>
-<p>Now that the data is prepared, we can make a plot. The assignment calls for a specific plot from lattice, so that’s what we’ll make.</p>
+<p>Now that the data is prepared, we can make a plot. There hasn’t been a lattice plot yet, so for practice, that’s what we’ll make.</p>
 <pre class="r"><code>library(lattice)
 xyplot(steps ~ interval | weekend, data=weeklyIntervals, 
        layout = c(1,2), 

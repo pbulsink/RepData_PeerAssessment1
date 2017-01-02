@@ -170,7 +170,7 @@ weeklyIntervals<-rbind(byWeekIntervals, byWeekendIntervals)
 weeklyIntervals$weekend<-as.factor(weeklyIntervals$weekend)
 ```
 
-Now that the data is prepared, we can make a plot. The assignment calls for a specific plot from lattice, so that's what we'll make.
+Now that the data is prepared, we can make a plot. There hasn't been a lattice plot yet, so for practice, that's what we'll make.
 
 ```{r lattice_steps_per_interval, echo=TRUE}
 library(lattice)
