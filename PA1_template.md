@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 The data that we are working with in this assigment comes from a personal activity monitoring device, such as a Fitbit, Fuelband, or Jawbone. Many people have these devices to improve their health. Additional information can be gathered from these data with proper processing.
 
@@ -13,7 +8,8 @@ The dataset was provided by the course GitHub, and contains counts of steps in 5
 
 We read the data in and apply a few transformations to the data to make it more usable. 
 
-```{r echo=TRUE}
+
+```r
 unzip("./activity.zip")
 stepdata<-read.csv("./activity.csv")
 stepdata$date<-as.Date(stepdata$date)
@@ -23,7 +19,8 @@ The only change we've made so far is to convert the ```date``` category to a 'Da
 
 We'll make a data set that doesn't include ```NA``` values, in case we need it later.
 
-```{r echo=TRUE}
+
+```r
 stepclean<-stepdata[complete.cases(stepdata),]
 ```
 
@@ -33,14 +30,16 @@ For this section we're looking at the total number of steps taken per day as a h
 
 First get the data broken up by day using ```split```, then form a list of daily sums with ```lapply``` and turn it into a vector with ```unlist```.
 
-```{r echo=TRUE}
+
+```r
 byDay<-split(stepdata, stepdata$date)
 dailysums<-lapply(byDay, function(x) colSums(x["steps"]))
 dailysums<-unlist(dailysums)
 ```
 
 With this ```dailysums``` vector, we can generate a histogram:
-```{r histogram_steps_per_day, echo=TRUE}
+
+```r
 library(ggplot2)
 ggplot(,aes(dailysums))+
   geom_histogram(bins=50, na.rm = TRUE)+
@@ -50,11 +49,18 @@ ggplot(,aes(dailysums))+
   theme_bw()
 ```
 
+![](PA1_template_files/figure-html/histogram_steps_per_day-1.png)<!-- -->
+
 We'll also usee this vector to calculate the mean and median of total steps per day and print it out:
-```{r echo = TRUE}
+
+```r
 meansteps<-mean(dailysums, na.rm=TRUE)
 mediansteps<-median(dailysums, na.rm=TRUE)
 paste0("The mean steps per day is: ", meansteps, " and the median steps per day is ", mediansteps, ".")
+```
+
+```
+## [1] "The mean steps per day is: 10766.1886792453 and the median steps per day is 10765."
 ```
 
 
@@ -62,7 +68,8 @@ paste0("The mean steps per day is: ", meansteps, " and the median steps per day 
 
 To look at this section we'll have to average each of the intervals across each day (eg. the first interval of every day). 
 
-```{r echo=TRUE}
+
+```r
 byinterval<-split(stepdata, stepdata$interval)
 intervalmeans<-lapply(byinterval, function(x) colMeans(x["steps"], na.rm=TRUE))
 stepmeans<-unlist(intervalmeans)
@@ -71,7 +78,8 @@ intervals<-unique(stepdata$interval)
 
 Now to plot that data:
 
-```{r steps_per_interval, echo=TRUE}
+
+```r
 ggplot(, aes(x=intervals, y=stepmeans)) + 
   geom_line(lwd=1)+
   xlab("Interval")+
@@ -80,27 +88,42 @@ ggplot(, aes(x=intervals, y=stepmeans)) +
   theme_bw()
 ```
 
+![](PA1_template_files/figure-html/steps_per_interval-1.png)<!-- -->
+
 
 We also need to discover the interval with the highest number of steps.
 
 For this, we'll step back one to ```intervalmeans``` to get the name or label of the maximum using which.max to find the max.
 
-```{r echo=TRUE}
+
+```r
 print(intervalmeans[which.max(intervalmeans)])
 ```
 
-So we see that interval `r names(intervalmeans[which.max(intervalmeans)])` has the most steps on average, at `r unlist(intervalmeans[[which.max(intervalmeans)]])`.
+```
+## $`835`
+##    steps 
+## 206.1698
+```
+
+So we see that interval 835 has the most steps on average, at 206.1698113.
 
 ## Imputing missing values
 Many values are missing. We'll take a look at how many before we try to impute the missing data. 
 
-```{r echo=TRUE}
+
+```r
 print(sum(is.na(stepdata$steps)))
+```
+
+```
+## [1] 2304
 ```
 
 With that much missing data, imputing values is important if we break the data apart for deeper analysis. First, replace ```NA``` with the average in each interval. Then rbind the interval devided set back to one dataframe.
 
-```{r echo=TRUE}
+
+```r
 for (i in 1:length(byinterval)) {
   byinterval[[i]]$steps[is.na(byinterval[[i]]$steps)]<-mean(byinterval[[i]]$steps, na.rm=TRUE)
 }
@@ -111,14 +134,16 @@ The function uses ```do.call``` to help the list explode to the dataframes insid
 
 Now, we'll break the impute set back up by day and sum each day again.
 
-```{r echo=TRUE}
+
+```r
 imputeDay<-split(imputesteps, imputesteps$date)
 imputedaysums<-lapply(imputeDay, function(x) colSums(x["steps"]))
 imputedaysums<-unlist(imputedaysums)
 ```
 
 With this ```imputedaysums``` vector, we can generate a histogram:
-```{r imputed_histogram, echo=TRUE}
+
+```r
 ggplot(,aes(imputedaysums))+
   geom_histogram(bins=50)+
   xlab("Number of Steps")+
@@ -127,12 +152,26 @@ ggplot(,aes(imputedaysums))+
   theme_bw()
 ```
 
+![](PA1_template_files/figure-html/imputed_histogram-1.png)<!-- -->
+
 We'll also usee this vector to calculate the mean and median of total steps per day and print it out:
-```{r echo = TRUE}
+
+```r
 meanimputesteps<-mean(imputedaysums, na.rm=TRUE)
 medianimputesteps<-median(imputedaysums, na.rm=TRUE)
 paste0("The imputed mean steps per day is: ", meanimputesteps, " and the imputed median steps per day is ", medianimputesteps, ".")
+```
+
+```
+## [1] "The imputed mean steps per day is: 10766.1886792453 and the imputed median steps per day is 10766.1886792453."
+```
+
+```r
 paste0("The original mean was: ",meansteps, " and the median was: ",mediansteps,".")
+```
+
+```
+## [1] "The original mean was: 10766.1886792453 and the median was: 10765."
 ```
 
 As expected, the mean didn't change, but the median did.
@@ -142,7 +181,8 @@ As expected, the mean didn't change, but the median did.
 We can look at differences between weekday and weekend results, to see if there's a trend that arises. 
 
 First, lets add weekday info to the data frame:
-```{r echo=TRUE}
+
+```r
 weekend<-c("Saturday", "Sunday")
 stepdata_days<-cbind(stepdata, weekdays(stepdata$date) %in% weekend)
 colnames(stepdata_days)<-c(colnames(stepdata), "weekend")
@@ -150,7 +190,8 @@ stepdata_days$weekend<-as.factor(stepdata_days$weekend)
 ```
 
 Now, as before, split the set by interval, but also by weekend/weekday:
-```{r echo=TRUE}
+
+```r
 byWeekIntervals<-split(stepdata_days, stepdata_days$weekend)[[1]]
 byWeekIntervals<-split(byWeekIntervals, byWeekIntervals$interval)
 weekdaymeans<-data.frame(unlist(lapply(byWeekIntervals, function(x) colMeans(x["steps"], na.rm=TRUE))))
@@ -161,7 +202,8 @@ weekendmeans<-data.frame(unlist(lapply(byWeekendIntervals, function(x) colMeans(
 ```
 
 Stitch the two back together:
-```{r echo=TRUE}
+
+```r
 byWeekIntervals<-cbind(intervals, weekdaymeans, rep("Weekday", length(intervals)))
 colnames(byWeekIntervals)<-c("interval", "steps", "weekend")
 byWeekendIntervals<-cbind(intervals, weekendmeans, rep("Weekend", length(intervals)))
@@ -172,7 +214,8 @@ weeklyIntervals$weekend<-as.factor(weeklyIntervals$weekend)
 
 Now that the data is prepared, we can make a plot. The assignment calls for a specific plot from lattice, so that's what we'll make.
 
-```{r lattice_steps_per_interval, echo=TRUE}
+
+```r
 library(lattice)
 xyplot(steps ~ interval | weekend, data=weeklyIntervals, 
        layout = c(1,2), 
@@ -181,3 +224,5 @@ xyplot(steps ~ interval | weekend, data=weeklyIntervals,
        xlab = "Interval",
        ylab = "Number of Steps")
 ```
+
+![](PA1_template_files/figure-html/lattice_steps_per_interval-1.png)<!-- -->
